@@ -1,0 +1,28 @@
+{
+    "name": "sage/container",
+    "title": "Container",
+    "category": "design",
+    "icon": "block-default",
+    "description": "Custom Container block",
+    "textdomain": "sage",
+    "editorScript": "file:./block.jsx",
+    "render": "file:./block.php",
+    "attributes": {
+        "backgroundColor": {
+            "type": "string",
+            "default": "white"
+        },
+        "removePaddingTop": {
+            "type": "boolean",
+            "default": false
+        },
+        "removePaddingBottom": {
+            "type": "boolean",
+            "default": false
+        }
+    },
+    "supports": {
+        "align": ["wide", "full"],
+        "html": false
+    }
+}

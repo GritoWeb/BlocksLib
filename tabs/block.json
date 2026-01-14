@@ -1,0 +1,93 @@
+{
+    "name": "sage/home-tabs-carousel",
+    "title": "Home Tabs Carousel",
+    "category": "design",
+    "icon": "slides",
+    "description": "Interactive tabs carousel with H-O-M-E letters, auto-advancing slides with two-column content layout",
+    "textdomain": "sage",
+    "editorScript": "file:./block.jsx",
+    "render": "file:./block.php",
+    "attributes": {
+        "slides": {
+            "type": "array",
+            "default": [
+                {
+                    "tabLetter": "H",
+                    "title": "",
+                    "content": "",
+                    "imageId": 0,
+                    "imageUrl": "",
+                    "imageAlt": "",
+                    "primaryButtonLabel": "",
+                    "primaryButtonUrl": "",
+                    "primaryButtonTarget": "_self",
+                    "secondaryButtonLabel": "",
+                    "secondaryButtonUrl": "",
+                    "secondaryButtonTarget": "_self"
+                },
+                {
+                    "tabLetter": "O",
+                    "title": "",
+                    "content": "",
+                    "imageId": 0,
+                    "imageUrl": "",
+                    "imageAlt": "",
+                    "primaryButtonLabel": "",
+                    "primaryButtonUrl": "",
+                    "primaryButtonTarget": "_self",
+                    "secondaryButtonLabel": "",
+                    "secondaryButtonUrl": "",
+                    "secondaryButtonTarget": "_self"
+                },
+                {
+                    "tabLetter": "M",
+                    "title": "",
+                    "content": "",
+                    "imageId": 0,
+                    "imageUrl": "",
+                    "imageAlt": "",
+                    "primaryButtonLabel": "",
+                    "primaryButtonUrl": "",
+                    "primaryButtonTarget": "_self",
+                    "secondaryButtonLabel": "",
+                    "secondaryButtonUrl": "",
+                    "secondaryButtonTarget": "_self"
+                },
+                {
+                    "tabLetter": "E",
+                    "title": "",
+                    "content": "",
+                    "imageId": 0,
+                    "imageUrl": "",
+                    "imageAlt": "",
+                    "primaryButtonLabel": "",
+                    "primaryButtonUrl": "",
+                    "primaryButtonTarget": "_self",
+                    "secondaryButtonLabel": "",
+                    "secondaryButtonUrl": "",
+                    "secondaryButtonTarget": "_self"
+                }
+            ]
+        },
+        "blockEyebrow": {
+            "type": "string",
+            "default": ""
+        },
+        "blockTitle": {
+            "type": "string",
+            "default": ""
+        },
+        "blockBody": {
+            "type": "string",
+            "default": ""
+        },
+        "activeTab": {
+            "type": "string",
+            "default": "H"
+        },
+        "isUserInteracting": {
+            "type": "boolean",
+            "default": false
+        }
+    }
+}
