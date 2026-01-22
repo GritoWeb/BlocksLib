@@ -45,6 +45,47 @@ import '../blocks/your-new-block/block.jsx';
 
 **Without this import, your block will NOT appear in the Gutenberg editor!**
 
+### ⚠️ Critical: PHP Block Registrar (Required)
+
+All blocks must be registered via a dedicated registrar file located at:
+
+**File:** `app/blocks.php`
+
+```php
+<?php
+
+add_action('init', function () {
+  $blocks = [
+    'hero',
+    'feature-grid',
+    'faq-accordion',
+    'tabs',
+  ];
+
+  foreach ($blocks as $block) {
+    $blockPath = get_theme_file_path("resources/blocks/{$block}");
+
+    if (file_exists("{$blockPath}/block.json")) {
+      register_block_type($blockPath);
+    }
+  }
+});
+```
+
+**IMPORTANT:** This file must be loaded in `functions.php` using the following pattern:
+
+```php
+collect(['setup', 'filters', 'blocks'])
+  ->each(function ($file) {
+    if (! locate_template($file = "app/{$file}.php", true, true)) {
+      wp_die(
+        /* translators: %s is replaced with the relative file path */
+        sprintf(__('Error locating <code>%s</code> for inclusion.', 'sage'), $file)
+      );
+    }
+  });
+```
+
 ---
 
 ## 📋 Block Structure Requirements
@@ -507,6 +548,7 @@ When creating a new block, ensure:
 - [ ] Create `block.php` with attribute extraction and view call
 - [ ] Create `{block-name}.blade.php` in `resources/views/blocks/`
 - [ ] **Import block in `resources/js/editor.js`** ⚠️ CRITICAL!
+- [ ] Ensure `app/blocks.php` registers the new block slug
 
 ### ✅ block.json
 - [ ] Unique name: `sage/{block-name}`
@@ -525,6 +567,7 @@ When creating a new block, ensure:
 - [ ] InspectorControls for settings
 - [ ] Editor UI with visual feedback
 - [ ] Consistent editor styling (blue gradient wrapper)
+- [ ] For links, use `LinkControl` (never plain text inputs for URLs)
 - [ ] Save function returning correct structure
 
 ### ✅ block.php
@@ -541,6 +584,7 @@ When creating a new block, ensure:
 - [ ] Build dynamic CSS classes safely
 - [ ] Render content with `{!! $content !!}` if needed
 - [ ] Use Tailwind CSS classes consistently
+- [ ] Render images using `wp_get_attachment_image()` when an image ID is available
 - [ ] Responsive design considerations (md:, lg: breakpoints)
 
 ---
@@ -618,9 +662,49 @@ import { Button } from '@wordpress/components';
         </Button>
     )}
 />
+
+**IMPORTANT:** Always render images on the frontend using `wp_get_attachment_image()` when an image ID exists.
+
+```blade
+@php
+  $imageId = $imageId ?? 0;
+  $imageAlt = $imageAlt ?? '';
+@endphp
+
+@if($imageId)
+  {!! wp_get_attachment_image($imageId, 'full', false, ['alt' => $imageAlt]) !!}
+@endif
 ```
 
-### 4. Color Palette Pattern
+### 4. Link Control Pattern (Mandatory)
+**Do not use plain text inputs for links.** Always use `LinkControl` to ensure correct Gutenberg behavior.
+
+```jsx
+import { __experimentalLinkControl as LinkControl } from '@wordpress/block-editor';
+import { Popover, Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+const [showLinkPopover, setShowLinkPopover] = useState(false);
+
+<Button variant="secondary" onClick={() => setShowLinkPopover(true)}>
+  {linkUrl ? 'Edit Link' : 'Select Link'}
+</Button>
+
+{showLinkPopover && (
+  <Popover position="middle center" onClose={() => setShowLinkPopover(false)}>
+    <LinkControl
+      value={{ url: linkUrl, opensInNewTab: linkTarget === '_blank' }}
+      onChange={(link) => setAttributes({
+        linkUrl: link.url,
+        linkTarget: link.opensInNewTab ? '_blank' : '_self'
+      })}
+    />
+  </Popover>
+)}
+```
+```
+
+### 5. Color Palette Pattern
 Standard color options:
 
 ```jsx
@@ -639,7 +723,7 @@ const colors = [
 />
 ```
 
-### 5. Array Management Pattern
+### 6. Array Management Pattern
 For repeating content:
 
 ```jsx
