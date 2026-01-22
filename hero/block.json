@@ -1,0 +1,77 @@
+{
+    "name": "sage/hero",
+    "title": "Hero",
+    "category": "design",
+    "icon": "cover-image",
+    "description": "Hero section with background image, heading, and buttons",
+    "textdomain": "sage",
+    "editorScript": "file:./block.jsx",
+    "render": "file:./block.php",
+    "attributes": {
+        "eyebrow": {
+            "type": "string",
+            "default": ""
+        },
+        "title": {
+            "type": "string",
+            "default": ""
+        },
+        "subtitle": {
+            "type": "string",
+            "default": ""
+        },
+        "backgroundImageId": {
+            "type": "number",
+            "default": 0
+        },
+        "backgroundImageUrl": {
+            "type": "string",
+            "default": ""
+        },
+        "backgroundImageAlt": {
+            "type": "string",
+            "default": ""
+        },
+        "overlayColor": {
+            "type": "string",
+            "default": "#000000"
+        },
+        "overlayOpacity": {
+            "type": "number",
+            "default": 40
+        },
+        "centerContent": {
+            "type": "boolean",
+            "default": true
+        },
+        "primaryButtonLabel": {
+            "type": "string",
+            "default": ""
+        },
+        "primaryButtonUrl": {
+            "type": "string",
+            "default": ""
+        },
+        "primaryButtonTarget": {
+            "type": "string",
+            "default": "_self"
+        },
+        "secondaryButtonLabel": {
+            "type": "string",
+            "default": ""
+        },
+        "secondaryButtonUrl": {
+            "type": "string",
+            "default": ""
+        },
+        "secondaryButtonTarget": {
+            "type": "string",
+            "default": "_self"
+        }
+    },
+    "supports": {
+        "align": ["wide", "full"],
+        "html": false,
+        "anchor": true
+    }
+}

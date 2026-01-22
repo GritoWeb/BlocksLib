@@ -1,0 +1,54 @@
+{
+    "name": "sage/faq-accordion",
+    "title": "FAQ Accordion",
+    "category": "text",
+    "icon": "editor-help",
+    "description": "Accordion block for FAQs",
+    "textdomain": "sage",
+    "editorScript": "file:./block.jsx",
+    "render": "file:./block.php",
+    "attributes": {
+        "eyebrow": {
+            "type": "string",
+            "default": ""
+        },
+        "title": {
+            "type": "string",
+            "default": ""
+        },
+        "body": {
+            "type": "string",
+            "default": ""
+        },
+        "openFirst": {
+            "type": "boolean",
+            "default": true
+        },
+        "allowMultiple": {
+            "type": "boolean",
+            "default": false
+        },
+        "items": {
+            "type": "array",
+            "default": [
+                {
+                    "question": "",
+                    "answer": ""
+                },
+                {
+                    "question": "",
+                    "answer": ""
+                },
+                {
+                    "question": "",
+                    "answer": ""
+                }
+            ]
+        }
+    },
+    "supports": {
+        "align": ["wide", "full"],
+        "html": false,
+        "anchor": true
+    }
+}

@@ -22,6 +22,29 @@ resources/views/blocks/
 └── {block-name}.blade.php  # Blade template for rendering
 ```
 
+### ⚠️ Critical: Block Registration
+
+**IMPORTANT:** After creating the `block.jsx` file, you **MUST** import it in your theme's editor JavaScript file:
+
+**File:** `/your-theme-name/resources/js/editor.js`
+
+```javascript
+// Import your block
+import '../blocks/{block-name}/block.jsx';
+```
+
+**Example:**
+```javascript
+// resources/js/editor.js
+import '../blocks/container/block.jsx';
+import '../blocks/home-tabs-carousel/block.jsx';
+import '../blocks/button/block.jsx';
+// Add your new block here
+import '../blocks/your-new-block/block.jsx';
+```
+
+**Without this import, your block will NOT appear in the Gutenberg editor!**
+
 ---
 
 ## 📋 Block Structure Requirements
@@ -483,6 +506,7 @@ When creating a new block, ensure:
 - [ ] Create `block.jsx` with edit and save functions
 - [ ] Create `block.php` with attribute extraction and view call
 - [ ] Create `{block-name}.blade.php` in `resources/views/blocks/`
+- [ ] **Import block in `resources/js/editor.js`** ⚠️ CRITICAL!
 
 ### ✅ block.json
 - [ ] Unique name: `sage/{block-name}`
@@ -651,7 +675,13 @@ const removeItem = (index) => {
 
 Use this as a starting point for any new block:
 
-**block.json:**
+**Step 1: Import in editor.js**
+```javascript
+// resources/js/editor.js
+import '../blocks/new-block/block.jsx';
+```
+
+**Step 2: block.json**
 ```json
 {
     "name": "sage/new-block",
@@ -670,7 +700,7 @@ Use this as a starting point for any new block:
 }
 ```
 
-**block.jsx:**
+**Step 3: block.jsx**
 ```jsx
 import { registerBlockType } from '@wordpress/blocks';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
@@ -705,7 +735,7 @@ registerBlockType('sage/new-block', {
 });
 ```
 
-**block.php:**
+**Step 4: block.php**
 ```php
 <?php
 // Server-side rendering for New Block
@@ -718,7 +748,7 @@ $block_data = [
 echo view('blocks.new-block', $block_data)->render();
 ```
 
-**new-block.blade.php:**
+**Step 5: new-block.blade.php**
 ```blade
 @php
   // Variables and logic
@@ -738,10 +768,14 @@ When tasked with creating a new Gutenberg block:
 1. **Analyze Requirements:** Understand the block's purpose, required fields, and functionality
 2. **Plan Structure:** Determine attributes, controls, and layout
 3. **Create Files:** Generate all 4 required files following patterns above
-4. **Follow Conventions:** Use established naming, styling, and code patterns
-5. **Ensure Completeness:** All attributes must flow through: JSON → JSX → PHP → Blade
-6. **Validate:** Check that editor preview matches expected frontend output
-7. **Documentation:** Comment complex logic and provide usage examples
+4. **Register Block:** **CRITICAL** - Add import statement in `resources/js/editor.js`
+5. **Follow Conventions:** Use established naming, styling, and code patterns
+6. **Ensure Completeness:** All attributes must flow through: JSON → JSX → PHP → Blade
+7. **Validate:** Check that editor preview matches expected frontend output
+8. **Documentation:** Comment complex logic and provide usage examples
+
+**⚠️ MOST COMMON MISTAKE TO AVOID:**
+Forgetting to import the block in `resources/js/editor.js` - **the block will not work without this step!**
 
 **Key Principles:**
 - Consistency with existing blocks

@@ -1,0 +1,59 @@
+{
+    "name": "sage/feature-grid",
+    "title": "Feature Grid",
+    "category": "design",
+    "icon": "grid-view",
+    "description": "Reusable grid of feature cards with icons",
+    "textdomain": "sage",
+    "editorScript": "file:./block.jsx",
+    "render": "file:./block.php",
+    "attributes": {
+        "eyebrow": {
+            "type": "string",
+            "default": ""
+        },
+        "title": {
+            "type": "string",
+            "default": ""
+        },
+        "body": {
+            "type": "string",
+            "default": ""
+        },
+        "columns": {
+            "type": "number",
+            "default": 3
+        },
+        "items": {
+            "type": "array",
+            "default": [
+                {
+                    "iconId": 0,
+                    "iconUrl": "",
+                    "iconAlt": "",
+                    "title": "",
+                    "text": ""
+                },
+                {
+                    "iconId": 0,
+                    "iconUrl": "",
+                    "iconAlt": "",
+                    "title": "",
+                    "text": ""
+                },
+                {
+                    "iconId": 0,
+                    "iconUrl": "",
+                    "iconAlt": "",
+                    "title": "",
+                    "text": ""
+                }
+            ]
+        }
+    },
+    "supports": {
+        "align": ["wide", "full"],
+        "html": false,
+        "anchor": true
+    }
+}
