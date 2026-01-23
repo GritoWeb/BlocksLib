@@ -21,19 +21,38 @@
       @endif
     </div>
 
-    <div class="space-y-4" data-accordion="{{ $allowMultiple ? 'multiple' : 'single' }}">
+    <div
+      class="space-y-4"
+      data-faq-accordion
+      data-allow-multiple="{{ $allowMultiple ? 'true' : 'false' }}"
+      data-open-first="{{ $openFirst ? 'true' : 'false' }}"
+    >
       @foreach($items as $index => $item)
-        @php
-          $isOpen = $openFirst && $index === 0;
-        @endphp
-        <details class="border border-gray-200 rounded-lg p-4" {{ $isOpen ? 'open' : '' }}>
-          <summary class="cursor-pointer text-base font-semibold list-none">
-            {!! $item['question'] ?? '' !!}
-          </summary>
-          <div class="mt-3 text-gray-600">
+        <div class="border border-gray-200 rounded-lg" data-accordion-item data-open="false">
+          <button
+            type="button"
+            class="w-full flex items-center justify-between gap-4 p-4 text-left"
+            data-accordion-trigger
+            aria-expanded="false"
+          >
+            <span class="text-base font-semibold">
+              {!! $item['question'] ?? '' !!}
+            </span>
+            <span class="relative flex items-center justify-center w-5 h-5">
+              <span
+                class="absolute w-4 h-0.5 bg-gray-700"
+                data-accordion-horizontal
+              ></span>
+              <span
+                class="absolute w-0.5 h-4 bg-gray-700"
+                data-accordion-vertical
+              ></span>
+            </span>
+          </button>
+          <div class="px-4 pb-4 text-gray-600 overflow-hidden" data-accordion-panel aria-hidden="true">
             {!! $item['answer'] ?? '' !!}
           </div>
-        </details>
+        </div>
       @endforeach
     </div>
   </div>

@@ -1,9 +1,9 @@
 {
-    "name": "sage/faq-accordion",
-    "title": "FAQ Accordion",
-    "category": "text",
-    "icon": "editor-help",
-    "description": "Accordion block for FAQs",
+    "name": "sage/tabs-basic",
+    "title": "Tabs (Basic)",
+    "category": "design",
+    "icon": "index-card",
+    "description": "Generic tabbed content block",
     "textdomain": "sage",
     "editorScript": "file:./block.jsx",
     "viewScript": "file:./block.js",
@@ -21,28 +21,24 @@
             "type": "string",
             "default": ""
         },
-        "openFirst": {
-            "type": "boolean",
-            "default": true
+        "activeTab": {
+            "type": "number",
+            "default": 0
         },
-        "allowMultiple": {
-            "type": "boolean",
-            "default": false
-        },
-        "items": {
+        "tabs": {
             "type": "array",
             "default": [
                 {
-                    "question": "",
-                    "answer": ""
+                    "label": "Tab 1",
+                    "content": ""
                 },
                 {
-                    "question": "",
-                    "answer": ""
+                    "label": "Tab 2",
+                    "content": ""
                 },
                 {
-                    "question": "",
-                    "answer": ""
+                    "label": "Tab 3",
+                    "content": ""
                 }
             ]
         }

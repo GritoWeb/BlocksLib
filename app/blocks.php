@@ -5,6 +5,7 @@ add_action('init', function () {
         'hero',
         'feature-grid',
         'faq-accordion',
+        'tabs-basic',
         'tabs',
     ];
 
