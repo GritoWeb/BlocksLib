@@ -372,42 +372,71 @@ registerBlockType('sage/container', {
 
 ---
 
-### 3. **block.php** - Server-Side Rendering
+### 3. **block.php** - Server-Side Rendering & Logic
 
-**Purpose:** Controller that passes data from WordPress to the Blade template.
+**Purpose:** Controller that processes all data, applies business logic, and prepares variables for the Blade template.
+
+**⚠️ CRITICAL RULE:** **ALL PHP logic must be in `block.php`**. The Blade template should **ONLY** render pre-processed variables.
 
 **Required Pattern:**
 ```php
 <?php
 // Server-side rendering for {Block Name}
 
+// 1. Extract attributes with defaults
 $attribute1 = $attributes['attribute1'] ?? 'default_value';
 $attribute2 = $attributes['attribute2'] ?? false;
 
+// 2. Process/transform data (ALL logic here)
+$processedValue = someFunction($attribute1);
+$cssClasses = buildCssClasses($attribute2);
+
+// 3. Prepare final data array for Blade
 $block_data = [
     'content' => $content ?? '',
     'attribute1' => $attribute1,
-    'attribute2' => $attribute2,
+    'processedValue' => $processedValue,
+    'cssClasses' => $cssClasses,
     'slug' => '{block-name}'
 ];
 
+// 4. Render view
 echo view('blocks.{block-name}', $block_data)->render();
 ```
 
-**Example - Container Block:**
+**Example - Container Block with Full Processing:**
 ```php
 <?php
 // Server-side rendering for Container block
 
+// Extract attributes
 $backgroundColor = $attributes['backgroundColor'] ?? 'white';
 $removePaddingTop = $attributes['removePaddingTop'] ?? false;
 $removePaddingBottom = $attributes['removePaddingBottom'] ?? false;
 
+// Process background color to CSS class
+$bgClass = match($backgroundColor) {
+    '#0B7D21' => 'bg-[#0B7D21]',
+    '#093E21' => 'bg-[#093E21]',
+    'white' => 'bg-white',
+    default => 'bg-white'
+};
+
+// Build padding classes
+$paddingClasses = 'px-4';
+if (!$removePaddingTop && !$removePaddingBottom) {
+    $paddingClasses .= ' py-14 md:py-24';
+} elseif ($removePaddingTop && !$removePaddingBottom) {
+    $paddingClasses .= ' pb-14 md:pb-24';
+} elseif (!$removePaddingTop && $removePaddingBottom) {
+    $paddingClasses .= ' pt-14 md:pt-24';
+}
+
+// Prepare data for Blade (all logic complete)
 $block_data = [
     'content' => $content ?? '',
-    'backgroundColor' => $backgroundColor,
-    'removePaddingTop' => $removePaddingTop,
-    'removePaddingBottom' => $removePaddingBottom,
+    'bgClass' => $bgClass,
+    'paddingClasses' => $paddingClasses,
     'slug' => 'container'
 ];
 
@@ -415,100 +444,29 @@ echo view('blocks.container', $block_data)->render();
 ```
 
 **Key Points:**
-- Use `??` null coalescing operator for safe defaults
-- Always pass `$content` if block supports `InnerBlocks`
-- Include `slug` for potential CSS/JS targeting
-- Use `view('blocks.{blade-name}', $data)->render()`
+- **Extract** all attributes with `??` defaults
+- **Process** all logic, conditionals, and transformations
+- **Build** CSS classes, format data, call WordPress functions
+- **Pass** only final, ready-to-render variables to Blade
+- Blade receives clean variables and just outputs them
 
 ---
 
 ### 4. **{block-name}.blade.php** - Frontend Template
 
-**Purpose:** Render the block's HTML output using Blade templating.
+**Purpose:** Render the block's HTML output using **ONLY** pre-processed variables from `block.php`.
 
 **Location:** `resources/views/blocks/{block-name}.blade.php`
 
-**Common Patterns:**
+**⚠️ CRITICAL RULES:**
+1. **NO `@php` blocks** for logic, conditionals, or transformations
+2. **NO** default value assignments (`??`)
+3. **NO** `match()`, complex conditionals, or data processing
+4. **ONLY** render variables that are already prepared by `block.php`
+5. Use **simple `@if`** directives to check if variables exist/are truthy
 
-**Simple Attribute Handling:**
+**✅ CORRECT Pattern - Clean Blade (Presentation Only):**
 ```blade
-@php
-  $bgColor = $backgroundColor ?? 'white';
-  $isActive = $isActive ?? false;
-@endphp
-
-<div class="custom-block {{ $isActive ? 'active' : '' }}">
-    {!! $content !!}
-</div>
-```
-
-**Color Mapping with match():**
-```blade
-@php
-  $bgColor = $backgroundColor ?? 'white';
-  
-  $bgClass = match($bgColor) {
-    '#0B7D21' => 'bg-[#0B7D21]',
-    '#093E21' => 'bg-[#093E21]',
-    'white' => 'bg-white',
-    default => 'bg-white'
-  };
-@endphp
-
-<div class="{{ $bgClass }}">
-    {!! $content !!}
-</div>
-```
-
-**Conditional Class Building:**
-```blade
-@php
-  $removePaddingTop = $removePaddingTop ?? false;
-  $removePaddingBottom = $removePaddingBottom ?? false;
-  
-  $paddingClasses = 'px-4'; // Always maintain horizontal padding
-  
-  if (!$removePaddingTop && !$removePaddingBottom) {
-    $paddingClasses .= ' py-14 md:py-24';
-  } elseif ($removePaddingTop && !$removePaddingBottom) {
-    $paddingClasses .= ' pb-14 md:pb-24';
-  } elseif (!$removePaddingTop && $removePaddingBottom) {
-    $paddingClasses .= ' pt-14 md:pt-24';
-  }
-@endphp
-
-<div class="container mx-auto {{ $paddingClasses }}">
-    {!! $content !!}
-</div>
-```
-
-**Example - Container Block:**
-```blade
-@php
-  $bgColor = $backgroundColor ?? 'white';
-  $removePaddingTop = $removePaddingTop ?? false;
-  $removePaddingBottom = $removePaddingBottom ?? false;
-  
-  // Map color values to Tailwind classes
-  $bgClass = match($bgColor) {
-    '#0B7D21' => 'bg-[#0B7D21]',
-    '#093E21' => 'bg-[#093E21]',
-    'white' => 'bg-white',
-    default => 'bg-white'
-  };
-
-  // Build padding classes
-  $paddingClasses = 'px-4';
-  
-  if (!$removePaddingTop && !$removePaddingBottom) {
-    $paddingClasses .= ' py-14 md:py-24';
-  } elseif ($removePaddingTop && !$removePaddingBottom) {
-    $paddingClasses .= ' pb-14 md:pb-24';
-  } elseif (!$removePaddingTop && $removePaddingBottom) {
-    $paddingClasses .= ' pt-14 md:pt-24';
-  }
-@endphp
-
 <div class="{{ $bgClass }}">
     <div class="container mx-auto {{ $paddingClasses }}">
         {!! $content !!}
@@ -516,19 +474,185 @@ echo view('blocks.container', $block_data)->render();
 </div>
 ```
 
-**Array/Loop Handling:**
+**✅ CORRECT Pattern - With Conditionals:**
 ```blade
+<section class="py-16">
+  <div class="container mx-auto px-6">
+    @if($eyebrow)
+      <p class="text-xs uppercase tracking-widest text-gray-500">{!! $eyebrow !!}</p>
+    @endif
+    
+    @if($title)
+      <h2 class="text-3xl font-bold mt-2">{!! $title !!}</h2>
+    @endif
+    
+    @if($imageId)
+      {!! wp_get_attachment_image($imageId, 'full', false, ['alt' => $imageAlt, 'class' => 'w-full rounded-lg']) !!}
+    @endif
+  </div>
+</section>
+```
+
+**❌ WRONG Pattern - Logic in Blade (DO NOT DO THIS):**
+```blade
+{{-- ❌ NO PHP BLOCKS --}}
 @php
-  $slides = $slides ?? [];
+  $bgColor = $backgroundColor ?? 'white';
+  $bgClass = match($bgColor) {
+    '#0B7D21' => 'bg-[#0B7D21]',
+    'white' => 'bg-white',
+    default => 'bg-white'
+  };
 @endphp
 
+{{-- ❌ NO DEFAULT ASSIGNMENTS --}}
+@php
+  $eyebrow = $eyebrow ?? '';
+  $title = $title ?? '';
+@endphp
+
+{{-- ❌ NO CONDITIONALS OR TRANSFORMATIONS --}}
+@php
+  $paddingClasses = 'px-4';
+  if (!$removePaddingTop) {
+    $paddingClasses .= ' pt-14';
+  }
+@endphp
+```
+
+**Example - Container Block (Clean Blade):**
+```blade
+<div class="{{ $bgClass }}">
+    <div class="container mx-auto {{ $paddingClasses }}">
+        {!! $content !!}
+    </div>
+</div>
+```
+
+**Example - Content Block with Multiple Conditionals:**
+```blade
+<section class="py-16">
+  <div class="container mx-auto px-6 max-w-4xl">
+    @if($eyebrow)
+      <p class="text-xs uppercase tracking-widest text-gray-500">{!! $eyebrow !!}</p>
+    @endif
+    
+    @if($title)
+      <h2 class="text-3xl font-bold mt-2">{!! $title !!}</h2>
+    @endif
+    
+    @if($text)
+      <p class="text-gray-600 mt-4">{!! $text !!}</p>
+    @endif
+    
+    @if($imageId)
+      <div class="mb-10">
+        {!! wp_get_attachment_image($imageId, 'full', false, ['alt' => $imageAlt, 'class' => $imageClass]) !!}
+      </div>
+    @endif
+    
+    @if($showParagraphs)
+      <div class="{{ $gridClasses }}">
+        @if($paragraph1)
+          <div class="prose prose-gray">
+            <p>{!! $paragraph1 !!}</p>
+          </div>
+        @endif
+        
+        @if($paragraph2)
+          <div class="prose prose-gray">
+            <p>{!! $paragraph2 !!}</p>
+          </div>
+        @endif
+      </div>
+    @endif
+  </div>
+</section>
+```
+
+**All logic for this example would be in `block.php`:**
+```php
+<?php
+// Server-side rendering
+
+$eyebrow = $attributes['eyebrow'] ?? '';
+$title = $attributes['title'] ?? '';
+$text = $attributes['text'] ?? '';
+$imageId = $attributes['imageId'] ?? 0;
+$imageAlt = $attributes['imageAlt'] ?? '';
+$paragraph1 = $attributes['paragraph1'] ?? '';
+$paragraph2 = $attributes['paragraph2'] ?? '';
+
+// Process logic
+$imageClass = 'w-full h-auto rounded-lg shadow-lg';
+$showParagraphs = !empty($paragraph1) || !empty($paragraph2);
+$gridClasses = 'grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8';
+
+$block_data = [
+    'eyebrow' => $eyebrow,
+    'title' => $title,
+    'text' => $text,
+    'imageId' => $imageId,
+    'imageAlt' => $imageAlt,
+    'imageClass' => $imageClass,
+    'paragraph1' => $paragraph1,
+    'paragraph2' => $paragraph2,
+    'showParagraphs' => $showParagraphs,
+    'gridClasses' => $gridClasses,
+    'slug' => 'content-block'
+];
+
+echo view('blocks.content-block', $block_data)->render();
+```
+
+**Key Points:**
+- **Extract** all attributes with defaults in `block.php`
+- **Process** all conditionals, transformations, and logic in `block.php`
+- **Build** CSS classes, check conditions, format data in `block.php`
+- **Pass** only final variables to Blade
+- **Blade** just renders with simple `@if` checks and `{{ }}` output
+
+**Array/Loop Handling Example:**
+
+`block.php`:
+```php
+<?php
+$items = $attributes['items'] ?? [];
+
+// Process items if needed
+$processedItems = array_map(function($item) {
+    return [
+        'title' => $item['title'] ?? '',
+        'content' => $item['content'] ?? '',
+        'imageId' => $item['imageId'] ?? 0,
+        'imageAlt' => $item['imageAlt'] ?? '',
+        'hasImage' => !empty($item['imageId'])
+    ];
+}, $items);
+
+$block_data = [
+    'items' => $processedItems,
+    'slug' => 'carousel'
+];
+
+echo view('blocks.carousel', $block_data)->render();
+```
+
+`carousel.blade.php`:
+```blade
 <div class="carousel">
-    @foreach($slides as $index => $slide)
+    @foreach($items as $index => $item)
         <div class="slide" data-index="{{ $index }}">
-            <h3>{{ $slide['title'] }}</h3>
-            <p>{{ $slide['content'] }}</p>
-            @if($slide['imageUrl'])
-                <img src="{{ $slide['imageUrl'] }}" alt="{{ $slide['imageAlt'] }}">
+            @if($item['title'])
+                <h3>{{ $item['title'] }}</h3>
+            @endif
+            
+            @if($item['content'])
+                <p>{{ $item['content'] }}</p>
+            @endif
+            
+            @if($item['hasImage'])
+                {!! wp_get_attachment_image($item['imageId'], 'full', false, ['alt' => $item['imageAlt']]) !!}
             @endif
         </div>
     @endforeach
@@ -572,20 +696,124 @@ When creating a new block, ensure:
 
 ### ✅ block.php
 - [ ] Extract all attributes with defaults using `??`
-- [ ] Build `$block_data` array with all needed values
+- [ ] **Process ALL logic, conditionals, and transformations**
+- [ ] Build CSS classes and compute derived values
+- [ ] Process arrays/loops if needed
+- [ ] Build `$block_data` array with all **final, ready-to-render** values
 - [ ] Include `$content` if using InnerBlocks
 - [ ] Include `slug` for targeting
 - [ ] Call view with correct template name
 
 ### ✅ Blade Template
-- [ ] Handle all passed attributes with defaults
-- [ ] Use `@php` blocks for logic
-- [ ] Use `match()` for value mapping when appropriate
-- [ ] Build dynamic CSS classes safely
+- [ ] **NO `@php` blocks for logic or data processing**
+- [ ] **NO** default value assignments (`??`)
+- [ ] **NO** `match()`, complex conditionals, or transformations
+- [ ] Handle all passed attributes (already processed by `block.php`)
+- [ ] Use **simple `@if` directives** only for rendering conditionals
 - [ ] Render content with `{!! $content !!}` if needed
+- [ ] **Use CSS variables from `wp-resources/css/variables.css` for colors and fonts** ⚠️
 - [ ] Use Tailwind CSS classes consistently
 - [ ] Render images using `wp_get_attachment_image()` when an image ID is available
 - [ ] Responsive design considerations (md:, lg: breakpoints)
+
+---
+
+## 🎨 CSS Variables & Design System
+
+**⚠️ CRITICAL:** Always reference the centralized CSS variables file for colors, fonts, and design tokens.
+
+**File:** `wp-resources/css/variables.css`
+
+### Color & Font Usage Rules:
+
+1. **Check `variables.css` FIRST** before adding colors or fonts
+2. **Use CSS custom properties** (variables) instead of hardcoded values
+3. **Never hardcode** hex colors, font families, or spacing values that exist in variables
+4. **Consult the design system** for consistency across all blocks
+
+### Example - Using CSS Variables:
+
+**❌ WRONG - Hardcoded values:**
+```blade
+<div class="bg-[#0B7D21] text-[#093E21]">
+    <h2 class="font-['Inter'] text-2xl">Title</h2>
+</div>
+```
+
+**✅ CORRECT - Using CSS variables:**
+```blade
+<div class="bg-primary text-primary-dark">
+    <h2 class="font-heading text-2xl">Title</h2>
+</div>
+```
+
+### Common CSS Variable Patterns:
+
+**Colors:**
+```css
+/* Check variables.css for available colors */
+--color-primary
+--color-primary-dark
+--color-primary-light
+--color-secondary
+--color-accent
+--color-text
+--color-text-muted
+--color-background
+--color-border
+```
+
+**Typography:**
+```css
+/* Check variables.css for font definitions */
+--font-heading
+--font-body
+--font-mono
+```
+
+**Spacing & Sizing:**
+```css
+/* Check variables.css for spacing scale */
+--spacing-xs
+--spacing-sm
+--spacing-md
+--spacing-lg
+--spacing-xl
+```
+
+### When Creating Color Pickers in Block Editor:
+
+Always map colors to CSS variables in `block.php`:
+
+```php
+// block.php
+$backgroundColor = $attributes['backgroundColor'] ?? 'primary';
+
+// Map to CSS variable classes
+$bgClass = match($backgroundColor) {
+    'primary' => 'bg-primary',
+    'primary-dark' => 'bg-primary-dark',
+    'secondary' => 'bg-secondary',
+    'white' => 'bg-white',
+    default => 'bg-primary'
+};
+```
+
+```jsx
+// block.jsx - ColorPalette should match variables.css
+const colors = [
+    { name: 'Primary', color: 'var(--color-primary)' },
+    { name: 'Primary Dark', color: 'var(--color-primary-dark)' },
+    { name: 'Secondary', color: 'var(--color-secondary)' },
+    { name: 'White', color: '#FFFFFF' }
+];
+```
+
+**Key Points:**
+- Consult `wp-resources/css/variables.css` before adding colors/fonts
+- Use semantic class names that map to CSS variables
+- Keep color pickers in sync with the design system
+- Document any new variables added to the system
 
 ---
 
@@ -705,19 +933,22 @@ const [showLinkPopover, setShowLinkPopover] = useState(false);
 ```
 
 ### 5. Color Palette Pattern
-Standard color options:
+
+**IMPORTANT:** Always reference `wp-resources/css/variables.css` for color definitions.
 
 ```jsx
+// Define colors based on CSS variables from variables.css
 const colors = [
-    { name: 'White', color: 'white' },
-    { name: 'Light Green', color: '#0B7D21' },
-    { name: 'Dark Green', color: '#093E21' }
+    { name: 'Primary', color: 'var(--color-primary)' },
+    { name: 'Primary Dark', color: 'var(--color-primary-dark)' },
+    { name: 'Secondary', color: 'var(--color-secondary)' },
+    { name: 'White', color: '#FFFFFF' }
 ];
 
 <ColorPalette
     colors={colors}
     value={backgroundColor}
-    onChange={(color) => setAttributes({ backgroundColor: color || 'white' })}
+    onChange={(color) => setAttributes({ backgroundColor: color || 'var(--color-primary)' })}
     disableCustomColors={true}
     clearable={false}
 />
@@ -750,8 +981,20 @@ const removeItem = (index) => {
 - **Block Name:** kebab-case (e.g., `home-tabs-carousel`)
 - **Attribute Names:** camelCase (e.g., `backgroundColor`, `removePaddingTop`)
 - **CSS Classes:** kebab-case (e.g., `container-block`, `tabs-carousel`)
+- **CSS Variables:** kebab-case with prefix (e.g., `--color-primary`, `--font-heading`)
 - **PHP Variables:** snake_case or camelCase (e.g., `$block_data`, `$bgColor`)
 - **Blade Files:** kebab-case (e.g., `container.blade.php`)
+
+---
+
+## 📚 Required Files & Resources
+
+Before creating blocks, ensure you have access to:
+
+- **`wp-resources/css/variables.css`** - Design system tokens (colors, fonts, spacing)
+- **`resources/js/editor.js`** - Block registration imports
+- **`app/blocks.php`** - PHP block registrar
+- **`functions.php`** - Must include `app/blocks.php`
 
 ---
 
@@ -834,14 +1077,16 @@ echo view('blocks.new-block', $block_data)->render();
 
 **Step 5: new-block.blade.php**
 ```blade
-@php
-  // Variables and logic
-@endphp
-
 <div class="new-block">
     {!! $content !!}
 </div>
 ```
+
+**Remember:**
+- Check `wp-resources/css/variables.css` for colors and fonts
+- Process all logic in `block.php`
+- Keep Blade clean (no `@php` blocks)
+- Use CSS variables instead of hardcoded values
 
 ---
 
@@ -850,21 +1095,29 @@ echo view('blocks.new-block', $block_data)->render();
 When tasked with creating a new Gutenberg block:
 
 1. **Analyze Requirements:** Understand the block's purpose, required fields, and functionality
-2. **Plan Structure:** Determine attributes, controls, and layout
-3. **Create Files:** Generate all 4 required files following patterns above
-4. **Register Block:** **CRITICAL** - Add import statement in `resources/js/editor.js`
-5. **Follow Conventions:** Use established naming, styling, and code patterns
-6. **Ensure Completeness:** All attributes must flow through: JSON → JSX → PHP → Blade
-7. **Validate:** Check that editor preview matches expected frontend output
-8. **Documentation:** Comment complex logic and provide usage examples
+2. **Check Design System:** Review `wp-resources/css/variables.css` for available colors, fonts, and spacing
+3. **Plan Structure:** Determine attributes, controls, and layout
+4. **Create Files:** Generate all 4 required files following patterns above
+5. **Register Block:** **CRITICAL** - Add import statement in `resources/js/editor.js` AND add slug to `app/blocks.php`
+6. **Follow Conventions:** Use established naming, styling, and code patterns
+7. **Process Logic in PHP:** ALL logic, conditionals, and transformations in `block.php` - Blade is presentation only
+8. **Use CSS Variables:** Reference `variables.css` for colors and fonts - no hardcoded values
+9. **Ensure Completeness:** All attributes must flow through: JSON → JSX → PHP → Blade
+10. **Validate:** Check that editor preview matches expected frontend output
+11. **Documentation:** Comment complex logic and provide usage examples
 
-**⚠️ MOST COMMON MISTAKE TO AVOID:**
-Forgetting to import the block in `resources/js/editor.js` - **the block will not work without this step!**
+**⚠️ MOST COMMON MISTAKES TO AVOID:**
+1. Forgetting to import the block in `resources/js/editor.js` - **the block will not work without this step!**
+2. Forgetting to add block slug to `app/blocks.php` registrar
+3. Adding logic to Blade templates (use `block.php` instead)
+4. Hardcoding colors/fonts instead of using CSS variables from `variables.css`
 
 **Key Principles:**
+- **Check `wp-resources/css/variables.css` FIRST** for colors and fonts
+- **All logic in `block.php`**, Blade only renders
 - Consistency with existing blocks
 - Reusable components and patterns
-- Clean separation of concerns
+- Clean separation of concerns (PHP = logic, Blade = view)
 - Accessible and user-friendly
 - Mobile-responsive design
 - Performance-conscious code
@@ -875,12 +1128,21 @@ Forgetting to import the block in `resources/js/editor.js` - **the block will no
 
 Study these existing blocks for patterns:
 
-- **Container** - InnerBlocks, color selection, padding controls
-- **Home Tabs Carousel** - Array management, media uploads, complex state
+- **Container** - InnerBlocks, color selection with CSS variables, padding controls
+- **Hero** - Background images, overlay opacity, CSS variable colors, button controls
+- **Feature Grid** - Array management, media uploads, responsive grid with CSS variables
+- **FAQ Accordion** - Array items, smooth animations, accessibility
+- **Tabs Basic** - Tab switching, active states, array management
 - **Button** - Simple component with link controls
+
+**Note:** All examples follow the pattern:
+- Colors from `wp-resources/css/variables.css`
+- Logic in `block.php`
+- Clean Blade templates (no `@php` blocks)
 
 ---
 
-**Last Updated:** January 14, 2026  
+**Last Updated:** February 4, 2026  
 **Maintainer:** GritoWeb  
+**Project:** BlocksLib
 **Project:** BlocksLib

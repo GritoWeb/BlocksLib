@@ -1,12 +1,3 @@
-@php
-  $eyebrow = $eyebrow ?? '';
-  $title = $title ?? '';
-  $body = $body ?? '';
-  $openFirst = $openFirst ?? true;
-  $allowMultiple = $allowMultiple ?? false;
-  $items = $items ?? [];
-@endphp
-
 <section class="py-16">
   <div class="container mx-auto px-6 max-w-3xl">
     <div class="mb-10">
@@ -24,8 +15,8 @@
     <div
       class="space-y-4"
       data-faq-accordion
-      data-allow-multiple="{{ $allowMultiple ? 'true' : 'false' }}"
-      data-open-first="{{ $openFirst ? 'true' : 'false' }}"
+      data-allow-multiple="{{ $allowMultiple }}"
+      data-open-first="{{ $openFirst }}"
     >
       @foreach($items as $index => $item)
         <div class="border border-gray-200 rounded-lg" data-accordion-item data-open="false">
@@ -36,7 +27,7 @@
             aria-expanded="false"
           >
             <span class="text-base font-semibold">
-              {!! $item['question'] ?? '' !!}
+              {!! $item['question'] !!}
             </span>
             <span class="relative flex items-center justify-center w-5 h-5">
               <span
@@ -50,7 +41,7 @@
             </span>
           </button>
           <div class="px-4 pb-4 text-gray-600 overflow-hidden" data-accordion-panel aria-hidden="true">
-            {!! $item['answer'] ?? '' !!}
+            {!! $item['answer'] !!}
           </div>
         </div>
       @endforeach

@@ -1,23 +1,3 @@
-@php
-  $eyebrow = $eyebrow ?? '';
-  $title = $title ?? '';
-  $subtitle = $subtitle ?? '';
-  $backgroundImageUrl = $backgroundImageUrl ?? '';
-  $backgroundImageAlt = $backgroundImageAlt ?? '';
-  $overlayColor = $overlayColor ?? '#000000';
-  $overlayOpacity = $overlayOpacity ?? 40;
-  $centerContent = $centerContent ?? true;
-  $primaryButtonLabel = $primaryButtonLabel ?? '';
-  $primaryButtonUrl = $primaryButtonUrl ?? '';
-  $primaryButtonTarget = $primaryButtonTarget ?? '_self';
-  $secondaryButtonLabel = $secondaryButtonLabel ?? '';
-  $secondaryButtonUrl = $secondaryButtonUrl ?? '';
-  $secondaryButtonTarget = $secondaryButtonTarget ?? '_self';
-
-  $overlayOpacityValue = max(0, min(100, (int) $overlayOpacity)) / 100;
-  $alignmentClass = $centerContent ? 'items-center text-center' : 'items-start text-left';
-@endphp
-
 <section class="relative overflow-hidden">
   @if($backgroundImageUrl)
     <img src="{{ $backgroundImageUrl }}" alt="{{ $backgroundImageAlt }}" class="absolute inset-0 h-full w-full object-cover" />
@@ -39,8 +19,8 @@
         <p class="text-base md:text-lg opacity-90">{!! $subtitle !!}</p>
       @endif
 
-      @if($primaryButtonLabel || $secondaryButtonLabel)
-        <div class="mt-4 flex flex-wrap gap-4 {{ $centerContent ? 'justify-center' : 'justify-start' }}">
+      @if($hasButtons)
+        <div class="mt-4 flex flex-wrap gap-4 {{ $buttonAlignment }}">
           @if($primaryButtonLabel)
             <a href="{{ $primaryButtonUrl }}" target="{{ $primaryButtonTarget }}" class="button-base primary-button">
               {!! $primaryButtonLabel !!}

@@ -17,6 +17,16 @@ $secondaryButtonLabel = $attributes['secondaryButtonLabel'] ?? '';
 $secondaryButtonUrl = $attributes['secondaryButtonUrl'] ?? '';
 $secondaryButtonTarget = $attributes['secondaryButtonTarget'] ?? '_self';
 
+// Process overlay opacity
+$overlayOpacityValue = max(0, min(100, (int) $overlayOpacity)) / 100;
+
+// Build alignment classes
+$alignmentClass = $centerContent ? 'items-center text-center' : 'items-start text-left';
+$buttonAlignment = $centerContent ? 'justify-center' : 'justify-start';
+
+// Check if buttons exist
+$hasButtons = !empty($primaryButtonLabel) || !empty($secondaryButtonLabel);
+
 $block_data = [
     'eyebrow' => $eyebrow,
     'title' => $title,
@@ -25,14 +35,16 @@ $block_data = [
     'backgroundImageUrl' => $backgroundImageUrl,
     'backgroundImageAlt' => $backgroundImageAlt,
     'overlayColor' => $overlayColor,
-    'overlayOpacity' => $overlayOpacity,
-    'centerContent' => $centerContent,
+    'overlayOpacityValue' => $overlayOpacityValue,
+    'alignmentClass' => $alignmentClass,
+    'buttonAlignment' => $buttonAlignment,
     'primaryButtonLabel' => $primaryButtonLabel,
     'primaryButtonUrl' => $primaryButtonUrl,
     'primaryButtonTarget' => $primaryButtonTarget,
     'secondaryButtonLabel' => $secondaryButtonLabel,
     'secondaryButtonUrl' => $secondaryButtonUrl,
     'secondaryButtonTarget' => $secondaryButtonTarget,
+    'hasButtons' => $hasButtons,
     'slug' => 'hero'
 ];
 
